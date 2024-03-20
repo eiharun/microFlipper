@@ -1,8 +1,11 @@
-# Student Names 
-Henry Forsyth
+# Student Names
+
+Harun Adiyaman
 
 # Summary
-This is a testing doc to see if I can pull it into the website
+
+A recreation of the FlipperZero device on a microcontroller (Arduino/ESP32/STM32)
 
 # Date Started
-11-16-2000
+
+03-20-2024
