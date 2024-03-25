@@ -61,6 +61,16 @@ My initial goal is to create a prototype off of a development board with proper 
 
 <!-- Your Text Here. You may work with your mentor on this later when they are assigned -->
 
+- Get familiar with new equipment (if any)
+- Program LCD GUI and Button Interface
+- Program a quick simple game easter egg
+- microSD card reader/writer
+- GPIO/Module Dev
+- IR
+- Sub-GHz/Radio
+- RFID
+- NFC
+
 ## Design Decisions
 
 <!-- Your Text Here. You may work with your mentor on this later when they are assigned -->
@@ -68,6 +78,16 @@ My initial goal is to create a prototype off of a development board with proper 
 ## Design Misc
 
 <!-- Your Text Here. You may work with your mentor on this later when they are assigned -->
+
+Trying to choose an STM32 Nucleo Dev Board (https://www.st.com/en/evaluation-tools/stm32-nucleo-boards.html)
+
+> FlipperZero uses the STM32WB55RG (Nucleo-WB55RG)
+>
+> - Wireless - Allows for wifi/bluetooth connection to the device, but costly
+> - Mainstream - Cheaper, but may not have all the features needed
+> - Ultra-Low Power - May be useful for battery life, but may not have all the features needed
+> - 64 pins - Enough for this project, but 144 pins may be useful for future expansion
+> - Flash - Not sure how much may be needed for this project, but the Flipper Zero has 1MB
 
 ## Steps for Documenting Your Design Process
 
@@ -77,6 +97,12 @@ My initial goal is to create a prototype off of a development board with proper 
 
 <!-- Your Text Here. You may work with your mentor on this later when they are assigned -->
 
+Microcontroller - ??
+
+LCD - ??
+
+Buttons - ??
+
 ## Timeline
 
 <!-- Your Text Here. You may work with your mentor on this later when they are assigned -->
@@ -85,7 +111,9 @@ My initial goal is to create a prototype off of a development board with proper 
 
 <!-- Your Text Here. You may work with your mentor on this later when they are assigned -->
 
-> https://docs.flipper.net/development > https://hackaday.io/project/170875/logs?sort=oldest
+> https://docs.flipper.net/development
+
+> https://hackaday.io/project/170875/logs?sort=oldest
 
 ## Log
 
