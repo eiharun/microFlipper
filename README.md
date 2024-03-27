@@ -5,11 +5,11 @@ haruna@vt.edu
 
 ## Mentor
 
-MENTOR NAME HERE
+Eddie Pritchard
 
 ## Current Status
 
-IN PROGRESS (Just started)
+IN PROGRESS
 
 ## Project Overview
 
@@ -64,30 +64,26 @@ My initial goal is to create a prototype off of a development board with proper 
 - Get familiar with new equipment (if any)
 - Program LCD GUI and Button Interface
 - Program a quick simple game easter egg
-- microSD card reader/writer
-- GPIO/Module Dev
-- IR
 - Sub-GHz/Radio
 - RFID
 - NFC
+- IR
+- microSD card reader/writer
+- GPIO/Module Dev
 
 ## Design Decisions
 
 <!-- Your Text Here. You may work with your mentor on this later when they are assigned -->
 
+STM32 Nucleo F747ZI was chosen as the development board for this project due to its high processing power, extensive peripheral support.
+
+128x64 1.3" I2C OLED Display was selected for its compact size, low power consumption, and simplicity of interfacing.
+
+> - May consider a SPI display for faster refresh rates if it becomes an issue
+
 ## Design Misc
 
 <!-- Your Text Here. You may work with your mentor on this later when they are assigned -->
-
-Trying to choose an STM32 Nucleo Dev Board (https://www.st.com/en/evaluation-tools/stm32-nucleo-boards.html)
-
-> FlipperZero uses the STM32WB55RG (Nucleo-WB55RG)
->
-> - Wireless - Allows for wifi/bluetooth connection to the device, but costly
-> - Mainstream - Cheaper, but may not have all the features needed
-> - Ultra-Low Power - May be useful for battery life, but may not have all the features needed
-> - 64 pins - Enough for this project, but 144 pins may be useful for future expansion
-> - Flash - Not sure how much may be needed for this project, but the Flipper Zero has 1MB
 
 ## Steps for Documenting Your Design Process
 
@@ -97,11 +93,13 @@ Trying to choose an STM32 Nucleo Dev Board (https://www.st.com/en/evaluation-too
 
 <!-- Your Text Here. You may work with your mentor on this later when they are assigned -->
 
-Microcontroller - ??
-
-LCD - ??
-
-Buttons - ??
+| Component           | Cost |
+| ------------------- | ---- |
+| STM32 Nucleo F747ZI | $59  |
+| 1.3 OLED Display    | $8   |
+| 10 Piece Buttons    | $7   |
+| Breadboard          | $9   |
+| Breadboard wires    | $12  |
 
 ## Timeline
 
