@@ -77,9 +77,7 @@ My initial goal is to create a prototype off of a development board with proper 
 
 STM32 Nucleo F747ZI was chosen as the development board for this project due to its high processing power, extensive peripheral support.
 
-128x64 1.3" I2C OLED Display was selected for its compact size, low power consumption, and simplicity of interfacing.
-
-> - May consider a SPI display for faster refresh rates if it becomes an issue
+128x64 2.4" OLED Display was selected for its larger size, making it easier to display information and interact with the device. It also supports both I2C and SPI communication protocols, providing flexibility in interfacing with the microcontroller.
 
 ## Design Misc
 
@@ -96,7 +94,7 @@ STM32 Nucleo F747ZI was chosen as the development board for this project due to 
 | Component           | Cost |
 | ------------------- | ---- |
 | STM32 Nucleo F747ZI | $59  |
-| 1.3 OLED Display    | $8   |
+| 2.4 OLED Display    | $14  |
 | 10 Piece Buttons    | $7   |
 | Breadboard          | $9   |
 | Breadboard wires    | $12  |
