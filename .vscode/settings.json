@@ -1,0 +1,13 @@
+{
+  "files.associations": {
+    "u8g2lib.h": "c",
+    "chrono": "c",
+    "arduino.h": "c",
+    "spi.h": "c",
+    "muiu8g2.h": "c",
+    "delay.h": "c",
+    "lcd.h": "c",
+    "pgmspace.h": "c"
+  },
+  "C_Cpp.errorSquiggles": "disabled"
+}
