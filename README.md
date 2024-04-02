@@ -36,6 +36,8 @@ This project aims to replicate the functionality of the Flipper Zero hacking dev
 Bonus features:
 
 - Serial Communication Decoder (MITMAtck)
+- CAN Bus capabilities
+- Gyroscope
 
 My initial goal is to create a prototype off of a development board with proper documentation such that anyone with the same development board can replicate the project. However my final ambition is to create a custom embedded PCB/handheld device with all the functionality of a flipper zero and hopefully more.
 
@@ -65,9 +67,9 @@ My initial goal is to create a prototype off of a development board with proper 
 - Program LCD GUI and Button Interface
 - Program a quick simple game easter egg
 - Sub-GHz/Radio
+- IR
 - RFID
 - NFC
-- IR
 - microSD card reader/writer
 - GPIO/Module Dev
 
@@ -78,6 +80,8 @@ My initial goal is to create a prototype off of a development board with proper 
 STM32 Nucleo F747ZI was chosen as the development board for this project due to its high processing power, extensive peripheral support.
 
 128x64 2.4" OLED Display was selected for its larger size, making it easier to display information and interact with the device. It also supports both I2C and SPI communication protocols, providing flexibility in interfacing with the microcontroller.
+
+Since the Nucleo F747ZI does not have built-in WiFi capabilities, an ESP8266 WiFi module was chosen to enable wireless communication.
 
 ## Design Misc
 
@@ -91,17 +95,23 @@ STM32 Nucleo F747ZI was chosen as the development board for this project due to 
 
 <!-- Your Text Here. You may work with your mentor on this later when they are assigned -->
 
-| Component           | Cost |
-| ------------------- | ---- |
-| STM32 Nucleo F747ZI | $59  |
-| 2.4 OLED Display    | $14  |
-| 10 Piece Buttons    | $7   |
-| Breadboard          | $9   |
-| Breadboard wires    | $12  |
+| Component                  | Cost |
+| -------------------------- | ---- |
+| STM32 Nucleo F747ZI        | $59  |
+| 2.4 OLED Display           | $14  |
+| 10 Piece Buttons           | $7   |
+| Breadboard                 | $9   |
+| Breadboard wires           | $12  |
+| ESP8266 WiFi Module        | $9   |
+| Breakout board for ESP8266 | $8   |
+| CC1101 Sub 1Ghz Module     | $13  |
 
 ## Timeline
 
 <!-- Your Text Here. You may work with your mentor on this later when they are assigned -->
+
+Milestone 1: LCD GUI and Button Interface
+Milestone 2: Sub-GHz/Radio Interface
 
 ## Useful Links
 
@@ -110,6 +120,11 @@ STM32 Nucleo F747ZI was chosen as the development board for this project due to 
 > https://docs.flipper.net/development
 
 > https://hackaday.io/project/170875/logs?sort=oldest
+
+> https://blog.flipper.net/tag/classroom/
+
+MFRC522 (13.56 MHz RFID/NFC Module) Datasheet:
+https://www.nxp.com/docs/en/data-sheet/MFRC522.pdf
 
 ## Log
 
