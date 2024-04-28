@@ -1,104 +1,24 @@
 #include <Arduino.h>
-#include <SPI.h>
 #include <U8g2lib.h>
+#include "menu.h"
+#include "game.h"
+#include "idle.h"
+
+U8G2_SH1106_128X64_NONAME_F_4W_HW_SPI u8g2(U8G2_R2, /* cs=*/9, /* dc=*/4, /* reset=*/6);
 
 //https://github.com/olikraus/u8g22/wiki/u8g22reference
-U8G2_SH1106_128X64_NONAME_1_4W_HW_SPI u8g2(U8G2_R2, /* cs=*/9, /* dc=*/4, /* reset=*/6);
-#define icon_wh 16
-static const unsigned char Game_bits[] PROGMEM = {
-  0x00, 0x02, 0x00, 0x01, 0x80, 0x00, 0x00, 0x01, 0x70, 0x0E, 0x88, 0x11, 
-  0x28, 0x14, 0x54, 0x2A, 0x24, 0x24, 0x02, 0x40, 0x42, 0x42, 0xA2, 0x45, 
-  0x52, 0x4A, 0x0C, 0x30, 0x00, 0x00, 0x00, 0x00, };
 
-static const unsigned char Idle_bits[] PROGMEM = {
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0xB6, 0x6D, 0xB6, 0x6D, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, };
-
-static const unsigned char NFC_bits[] PROGMEM = {
-  0x00, 0x00, 0x00, 0x08, 0x00, 0x10, 0x00, 0x24, 0x00, 0x48, 0x42, 0x52, 
-  0x46, 0x54, 0x4A, 0x55, 0x52, 0x55, 0x62, 0x54, 0x42, 0x52, 0x00, 0x48, 
-  0x00, 0x24, 0x00, 0x10, 0x00, 0x08, 0x00, 0x00, };
-
-static const unsigned char RFID_bits[] PROGMEM = {
-  0x00, 0x00, 0x00, 0x02, 0x00, 0x0C, 0x40, 0x12, 0xA0, 0x24, 0x10, 0x49, 
-  0x08, 0x52, 0x04, 0x54, 0x02, 0x52, 0x01, 0x49, 0x80, 0x24, 0x41, 0x12, 
-  0x22, 0x0C, 0x14, 0x02, 0x08, 0x00, 0x00, 0x00, };
-
-static const unsigned char Settings_bits[] PROGMEM = {
-  0x00, 0x08, 0x02, 0x14, 0x04, 0x0A, 0x08, 0x4A, 0x10, 0xB2, 0x20, 0x41, 
-  0xC0, 0x38, 0x40, 0x04, 0x20, 0x02, 0x1C, 0x03, 0x82, 0x04, 0x4D, 0x18, 
-  0x53, 0x28, 0x50, 0x50, 0x28, 0x60, 0x18, 0x00, };
-static const unsigned char SubGhz_bits[] PROGMEM = {
-  0x00, 0x00, 0x10, 0x08, 0x08, 0x10, 0x24, 0x24, 0x12, 0x48, 0x0A, 0x50, 
-  0xAA, 0x55, 0xAA, 0x55, 0x0A, 0x50, 0x92, 0x49, 0xA4, 0x25, 0x88, 0x11, 
-  0x90, 0x09, 0x80, 0x01, 0x80, 0x01, 0x00, 0x00, };
-
-static const unsigned char ScrollBar_bits[] PROGMEM = {
-  0x00, 0x20, 0x00, 0x20, 0x00, 0x20, 0x00, 0x20, 0x00, 0x20, 0x00, 0x20, 
-  0x00, 0x20, 0x00, 0x20, 0x00, 0x20, 0x00, 0x20, 0x00, 0x20, 0x00, 0x20, 
-  0x00, 0x20, 0x00, 0x20, 0x00, 0x20, 0x00, 0x20, 0x00, 0x20, 0x00, 0x20, 
-  0x00, 0x20, 0x00, 0x20, 0x00, 0x20, 0x00, 0x20, 0x00, 0x20, 0x00, 0x20, 
-  0x00, 0x20, 0x00, 0x20, 0x00, 0x20, 0x00, 0x20, 0x00, 0x20, 0x00, 0x20, 
-  0x00, 0x20, 0x00, 0x00, };
-static const unsigned char Select_bits[] PROGMEM = {
-  0xF0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
-  0xFF, 0xFF, 0xFF, 0x03, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x04, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 
-  0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x0C, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x04, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 
-  0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x0C, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x04, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 
-  0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x0C, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x04, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 
-  0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x0C, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x04, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 
-  0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x0C, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x04, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 
-  0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x0C, 0xF0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
-  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x07, 0xE0, 0xFF, 0xFF, 0xFF, 
-  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x03, 
-  };
-
-
-//
-#define ScrollBar_width 7
-#define ScrollBar_height 64
-#define Select_width 128
-#define Select_height 21
-const int icon_len = 6;
-const unsigned char* icon_BMParray[icon_len] = {
-  Game_bits, Idle_bits, NFC_bits, RFID_bits, Settings_bits, SubGhz_bits
-};
-
-char menu_items[icon_len][20]={
-  {"Game"},
-  {"Idle"},
-  {"NFC"},
-  {"RFID"},
-  {"Settings"},
-  {"Sub-GHz"}
-};
-
-int backlight_tgl_State=LOW;            // the current reading from the input pin
-int backlight_tgl_lastState = LOW;  // the previous reading from the input pin
-
+int backlight_tgl_State=LOW;            
+// int backlight_tgl_lastState = LOW;  
+int sel_state=LOW;
+int sel_lastState=LOW;
 int up_lastState=LOW;
-
 int down_lastState=LOW;
 
+int item_sel = 0;
+int item_prev;
+int item_next;
+int idle=0;
 
 void setup(void) {
   pinMode(2,INPUT);
@@ -107,21 +27,52 @@ void setup(void) {
   u8g2.begin();
   u8g2.setBitmapMode(1);
   u8g2.setColorIndex(1);
-  u8g2.setDrawColor(2);//XOR mode
+//   Serial.begin(9600);
 }
-
-int item_sel = 0;
-int item_prev;
-int item_next;
 
 void loop() {
   int up = digitalRead(2);
   int down = digitalRead(5);
-  int backlight_tgl = digitalRead(3);
-  toggle(backlight_tgl_State, backlight_tgl, backlight_tgl_lastState);
-  // toggle(down_state, down, down_lastState);
-  // toggle(up_state, up, up_lastState);
+  // int backlight_tgl = digitalRead(3);
+  // toggle(backlight_tgl_State, backlight_tgl, backlight_tgl_lastState);
+  int sel = digitalRead(3);
+  toggle(sel_state, sel, sel_lastState);
+  if(!sel_state){
+    oneclick(up, down);
+  }
+  item_prev = item_sel-1;
+  if (item_prev <0){
+    item_prev = icon_len-1;
+  }
+  item_next = item_sel+1;
+  if(item_next >= icon_len){
+    item_next = 0;
+  }
+  //
+  u8g2.clearBuffer();
+  switch(backlight_tgl_State){
+    default: break;
+    case LOW:
+      base();
+      break;
+    case HIGH:
+      base();
+      u8g2.setDrawColor(2);//XOR mode
+      u8g2.drawBox(0,0,128,64);  //Inverts the image https://github.com/olikraus/u8g2/issues/1729
+      break;
+  }
+  u8g2.sendBuffer();
 
+}
+
+void toggle(int &state, int reading, int &last_state){
+  if (reading != last_state) {
+    state ^= reading;
+    last_state = reading;
+  }
+}
+
+void oneclick(int &up, int &down){
   if((up==HIGH) && (up_lastState==HIGH)){
     item_sel += 1;
     up_lastState=LOW;
@@ -136,65 +87,167 @@ void loop() {
       item_sel = icon_len-1;
     }
   }
+  //Reset
   if(!up && !up_lastState){
     up_lastState=HIGH;
   }
   if(!down && !down_lastState){
     down_lastState=HIGH;
   }
+}
 
-  item_prev = item_sel-1;
-  if (item_prev <0){
-    item_prev = icon_len-1;
-  }
-  item_next = item_sel+1;
-  if(item_next >= icon_len){
-    item_next = 0;
-  }
+void menu_screen(){
+  u8g2.setDrawColor(1);//Reg mode
+  u8g2.drawBox(128-3, (64/icon_len)*item_sel, 3, (64/icon_len) + ((64%icon_len) * ((item_sel/(icon_len-1)))));
+  u8g2.drawXBMP(128-ScrollBar_width, 0, ScrollBar_width,  ScrollBar_height, ScrollBar_bits);
+  u8g2.drawXBMP(4, 2, icon_wh,  icon_wh, menu_item[item_prev].icon);
+  u8g2.setFont(u8g_font_7x14);
+  u8g2.drawStr(26, 15, menu_item[item_prev].icon_name);
+  u8g2.drawXBMP(0, 22, Select_width,  Select_height, Select_bits);
+  u8g2.drawXBMP(4, (64/2)-8, icon_wh,  icon_wh, menu_item[item_sel].icon);
+  u8g2.setFont(u8g_font_7x14B);
+  u8g2.drawStr(26, 37, menu_item[item_sel].icon_name);
+  u8g2.drawXBMP(4, 64-2-16, icon_wh,  icon_wh, menu_item[item_next].icon);
+  u8g2.setFont(u8g_font_7x14);
+  u8g2.drawStr(26, 59, menu_item[item_next].icon_name);
+}
 
-  u8g2.firstPage();
-  do {
-    switch(backlight_tgl_State){
-      default: break;
-      case LOW:
-        u8g2.drawXBMP(128-ScrollBar_width, 0, ScrollBar_width,  ScrollBar_height, ScrollBar_bits);
-        u8g2.drawXBMP(4, 2, icon_wh,  icon_wh, icon_BMParray[item_prev]);
-        u8g2.setFont(u8g_font_7x14);
-        u8g2.drawStr(26, 15, menu_items[item_prev]);
-        u8g2.drawXBMP(0, 22, Select_width,  Select_height, Select_bits);
-        u8g2.drawXBMP(4, (64/2)-8, icon_wh,  icon_wh, icon_BMParray[item_sel]);
-        u8g2.setFont(u8g_font_7x14B);
-        u8g2.drawStr(26, 37, menu_items[item_sel]);
-        u8g2.drawXBMP(4, 64-2-16, icon_wh,  icon_wh, icon_BMParray[item_next]);
-        u8g2.setFont(u8g_font_7x14);
-        u8g2.drawStr(26, 59, menu_items[item_next]);
-        break;
-      case HIGH:
-        u8g2.drawXBMP(128-ScrollBar_width, 0, ScrollBar_width,  ScrollBar_height, ScrollBar_bits);
-        u8g2.drawXBMP(4, 2, icon_wh,  icon_wh, icon_BMParray[item_prev]);
-        u8g2.setFont(u8g_font_7x14);
-        u8g2.drawStr(26, 15, menu_items[item_prev]);
-        u8g2.drawXBMP(0, 22, Select_width,  Select_height, Select_bits);
-        u8g2.drawXBMP(4, (64/2)-8, icon_wh,  icon_wh, icon_BMParray[item_sel]);
-        u8g2.setFont(u8g_font_7x14B);
-        u8g2.drawStr(26, 37, menu_items[item_sel]);
-        u8g2.drawXBMP(4, 64-2-16, icon_wh,  icon_wh, icon_BMParray[item_next]);
-        u8g2.setFont(u8g_font_7x14);
-        u8g2.drawStr(26, 59, menu_items[item_next]);
-        u8g2.drawBox(0,0,128,64);  //Inverts the image https://github.com/olikraus/u8g2/issues/1729
-        // u8g2.drawXBMP(0, 0, 128,  64, epd_bitmap_F_pg_inv);
-        break;
+void base(){
+  idle++;
+  int screen = ((sel_state)|(sel_state<<1)|(sel_state<<2)) & (item_sel+1);
+  switch(screen){
+    default:
+      // menu_screen();
+      u8g2.setFont(u8g_font_7x14);
+      u8g2.drawStr(5, 15, "WELCOME!!");
+      delay(1000);
+      break;
+    case 0:
+      menu_screen();
+      break;
+    case 1:
+      // u8g2.setFont(u8g_font_7x14);
+      // u8g2.drawStr(5, 15, menu_item[item_sel].icon_name);
+      displayIdleanim(idle);
+      //if any button is pressed: case 0 (screen=0)
+      break;
+    case 2:
+      u8g2.setFont(u8g_font_7x14);
+      u8g2.drawStr(5, 15, menu_item[item_sel].icon_name);
+      break;
+    case 3:
+      u8g2.setFont(u8g_font_7x14);
+      u8g2.drawStr(5, 15, menu_item[item_sel].icon_name);
+      break;
+    case 4:
+      u8g2.setFont(u8g_font_7x14);
+      u8g2.drawStr(5, 15, menu_item[item_sel].icon_name);
+      break;
+    case 5:
+      play_game();
+      break;
+    case 6:
+      u8g2.setFont(u8g_font_7x14);
+      u8g2.drawStr(5, 15, menu_item[item_sel].icon_name);
+      break;
+
+  }
+}
+
+void displayIdleanim(int &frame){
+  if (frame>=num_frames){
+    frame=0;
+  }
+  u8g2.drawHLine((frame-64)%num_frames,64/4,21);
+  u8g2.drawHLine((frame-42)%num_frames,64/2,21);
+  u8g2.drawHLine((frame-21)%num_frames,64*3/4,21);
+  delay(5);
+}
+
+
+void play_game(){
+  
+
+  pong player={1,64/2,1,8};
+  pong ping={126,64/2,1,8};
+  pong ball={128/2,64/2,2,2,UP,LEFT};
+  int defeat=0;
+  int victory=0;
+  while((!victory) && (!defeat)){
+    int player_up = digitalRead(2);
+    int player_down = digitalRead(5);
+    int exit = digitalRead(3);
+    if(exit){
+      return;
     }
+    u8g2.clearBuffer();
+    ping.y_pos = ball.y_pos-(ping.h_size/2);//Game is impossible to win
+    u8g2.drawBox(player.x_pos, player.y_pos, player.w_size, player.h_size);
+    u8g2.drawBox(ping.x_pos, ping.y_pos, ping.w_size, ping.h_size);
+    u8g2.drawBox(ball.x_pos, ball.y_pos, ball.w_size, ball.h_size);
+
+    if((player_up)&&(player.y_pos<(127-player.h_size))){
+      player.y_pos++;
+    }
+    if((player_down)&&(player.y_pos>=0)){
+      player.y_pos--;
+    }
+
+    if ((ball.x_pos<player.x_pos) && ((ball.y_pos < player.y_pos+player.h_size) && (ball.y_pos > player.y_pos)) ){
+      ball.directionlr=RIGHT;
+    }
+
+    if ((ball.x_pos>ping.x_pos) && ((ball.y_pos < ping.y_pos+ping.h_size) && (ball.y_pos > ping.y_pos)) ){
+      ball.directionlr=LEFT;
+    }
+
+    if(ball.y_pos<=0){
+      ball.directionud=DOWN;
+    }
+    if(ball.y_pos>63){
+      ball.directionud=UP;
+    }
+
+    if(ball.directionlr==LEFT){
+      ball.x_pos--;
+    }
+    if(ball.directionlr==RIGHT){
+      ball.x_pos++;
+    }
+    if(ball.directionud==UP){
+      ball.y_pos--;
+    }
+    if(ball.directionud==DOWN){
+      ball.y_pos++;
+    }
+
+
+    if(ball.x_pos >127){
+      victory=1;
       
+    }
+    if(ball.x_pos < player.x_pos-1){
+      defeat=1;
+      
+    }
 
-  } while (u8g2.nextPage());  // u8g2 library specific, has to be there
-}
-
-void toggle(int &state, int reading, int &last_state){
-  if (reading != last_state) {
-    // delay(1);
-    state ^= reading;
-    last_state = reading;
+    if(victory){
+      u8g2.clearBuffer();
+      u8g2.setFont(u8g_font_7x14);
+      u8g2.drawStr(5, 15, "Victory!");
+      u8g2.sendBuffer();
+      delay(1000);
+      return;
+    }
+    if(defeat){
+      u8g2.clearBuffer();
+      u8g2.setFont(u8g_font_7x14);
+      u8g2.drawStr(5, 15, "Defeat!");
+      u8g2.sendBuffer();
+      delay(1000);
+      return;
+    }
+    delay(35); 
+    u8g2.sendBuffer();
   }
 }
-

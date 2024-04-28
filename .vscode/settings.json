@@ -7,7 +7,9 @@
     "muiu8g2.h": "c",
     "delay.h": "c",
     "lcd.h": "c",
-    "pgmspace.h": "c"
+    "pgmspace.h": "c",
+    "locale": "cpp",
+    "string": "cpp"
   },
   "C_Cpp.errorSquiggles": "disabled"
 }

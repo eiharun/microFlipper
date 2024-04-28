@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;SimpleGUI/Core/Src/Bitmaps&apos; to &apos;Bitmaps.h&apos;" description="Rename resource &apos;Bitmaps&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="Core/Src/Bitmaps" name="Bitmaps.h" stamp="1714097331280" updateReferences="true"/>
+</session>

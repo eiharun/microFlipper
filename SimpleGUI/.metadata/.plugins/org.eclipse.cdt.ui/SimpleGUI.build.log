@@ -1,0 +1,10 @@
+18:58:39 **** Incremental Build of configuration Debug for project SimpleGUI ****
+make -j16 all 
+arm-none-eabi-size  SimpleGUI.elf 
+   text	   data	    bss	    dec	    hex	filename
+  23972	    332	   4508	  28812	   708c	SimpleGUI.elf
+Finished building: default.size.stdout
+ 
+
+18:58:40 Build Finished. 0 errors, 0 warnings. (took 1s.63ms)
+

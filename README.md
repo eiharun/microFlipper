@@ -91,6 +91,8 @@ Since the Nucleo F747ZI does not have built-in WiFi capabilities, an ESP8266 WiF
 
 <!-- Your Text Here. You may work with your mentor on this later when they are assigned -->
 
+SSD1309 OLED Max clock frequency is 10MHz
+
 ## BOM + Component Cost
 
 <!-- Your Text Here. You may work with your mentor on this later when they are assigned -->
