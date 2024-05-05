@@ -24,6 +24,7 @@
 /* USER CODE BEGIN Includes */
 #include "u8g2stm32/u8g2.h"
 #include "Bitmaps.h"
+#include "GUI.h"
 
 /* USER CODE END Includes */
 
@@ -66,6 +67,8 @@ ETH_HandleTypeDef heth;
 
 SPI_HandleTypeDef hspi1;
 
+TIM_HandleTypeDef htim3;
+
 UART_HandleTypeDef huart3;
 
 PCD_HandleTypeDef hpcd_USB_OTG_FS;
@@ -81,6 +84,7 @@ static void MX_ETH_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_USB_OTG_FS_PCD_Init(void);
 static void MX_SPI1_Init(void);
+static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
 
 uint8_t u8g2_gpio_and_delay_stm32(U8X8_UNUSED u8x8_t *u8x8, U8X8_UNUSED uint8_t msg, U8X8_UNUSED uint8_t arg_int, U8X8_UNUSED void *arg_ptr)
@@ -159,7 +163,6 @@ uint8_t u8x8_byte_stm32_hw_spi(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void 
 }
 
 
-
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -201,8 +204,10 @@ int main(void)
   MX_USART3_UART_Init();
   MX_USB_OTG_FS_PCD_Init();
   MX_SPI1_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
   HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin,0);
+	HAL_TIM_Base_Start_IT(&htim3);
 
   u8g2_Setup_ssd1309_128x64_noname2_f(&u8g2, U8G2_R0, u8x8_byte_stm32_hw_spi, u8g2_gpio_and_delay_stm32);
   u8g2_InitDisplay(&u8g2); // send init sequence to the display, display is in sleep mode after this,
@@ -216,25 +221,11 @@ int main(void)
   {
     /* USER CODE END WHILE */
 
-	/* USER CODE BEGIN 3 */
-	HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
-	u8g2_FirstPage(&u8g2);
-	GPIO_PinState up = HAL_GPIO_ReadPin(Up_BTN_GPIO_Port, Up_BTN_Pin);
-	u8g2_ClearBuffer(&u8g2);
-	u8g2_SetDrawColor(&u8g2,1);
-	u8g2_SetBitmapMode(&u8g2,1);
-	u8g2_DrawXBMP(&u8g2, icn_x, top_icn_y, icon_wh, icon_wh,  SubGhz_bits);
-	u8g2_DrawXBMP(&u8g2, icn_x, mid_icn_y, icon_wh, icon_wh,  NFC_bits);
-	u8g2_DrawXBMP(&u8g2, icn_x, bot_icn_y, icon_wh, icon_wh,  Game_bits);
-	if (up == GPIO_PIN_SET){
-		u8g2_DrawXBMP(&u8g2, icn_x, top_icn_y, icon_wh, icon_wh,  Idle_bits);
-		u8g2_DrawXBMP(&u8g2, icn_x, mid_icn_y, icon_wh, icon_wh,  SubGhz_bits);
-		u8g2_DrawXBMP(&u8g2, icn_x, bot_icn_y, icon_wh, icon_wh,  RFID_bits);
-	}
-	u8g2_DrawXBMP(&u8g2, 0, 22, Select_width,  Select_height, Select_bits);
-	u8g2_DrawXBMP(&u8g2, 127-ScrollBar_width, 0, ScrollBar_width,  ScrollBar_height, ScrollBar_bits);
-
-	u8g2_SendBuffer(&u8g2);
+    /* USER CODE BEGIN 3 */
+	  //USE FREE RTOS
+  	handle_Windows(&u8g2);//Task1
+  	HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);//Task2
+  	HAL_Delay(10);
 
   }
   /* USER CODE END 3 */
@@ -380,6 +371,52 @@ static void MX_SPI1_Init(void)
 }
 
 /**
+  * @brief TIM3 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM3_Init(void)
+{
+
+  /* USER CODE BEGIN TIM3_Init 0 */
+
+  /* USER CODE END TIM3_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM3_Init 1 */
+
+  /* USER CODE END TIM3_Init 1 */
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 0;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 65535;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM3_Init 2 */
+//  TIM3->ARR = 0;
+  TIM3->ARR = 51999;//Count up to
+  /* USER CODE END TIM3_Init 2 */
+
+}
+
+/**
   * @brief USART3 Initialization Function
   * @param None
   * @retval None
@@ -502,14 +539,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(OLED_Reset_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : Up_BTN_Pin Left_BTN_Pin Back_BTN_Pin */
-  GPIO_InitStruct.Pin = Up_BTN_Pin|Left_BTN_Pin|Back_BTN_Pin;
+  /*Configure GPIO pins : Up_BTN_Pin Select_BTN_Pin Back_BTN_Pin */
+  GPIO_InitStruct.Pin = Up_BTN_Pin|Select_BTN_Pin|Back_BTN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : Right_BTN_Pin Down_BTN_Pin Enter_BTN_Pin */
-  GPIO_InitStruct.Pin = Right_BTN_Pin|Down_BTN_Pin|Enter_BTN_Pin;
+  /*Configure GPIO pins : Right_BTN_Pin Down_BTN_Pin Left_BTN_Pin */
+  GPIO_InitStruct.Pin = Right_BTN_Pin|Down_BTN_Pin|Left_BTN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
@@ -539,7 +576,22 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Timer3 has rolled over
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+	if(htim == &htim3){
+		if(Tim3Count==255){
+			//Handle Idle Animation Delay
+			z_iter++;
+			z_iter=z_iter%4;
+		}
+		if(Tim3Count>=255){
+			Tim3Count=0;//Don't let overflow
+		}
+		Tim3Count++;
+	}
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 /* USER CODE END 4 */
 
 /**

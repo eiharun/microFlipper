@@ -1,0 +1,9 @@
+../Core/Src/GUI.c:29:10:handleInput	31
+../Core/Src/GUI.c:92:6:handle_Windows	8
+../Core/Src/GUI.c:129:6:window_Menu	8
+../Core/Src/GUI.c:193:6:window_Game	2
+../Core/Src/GUI.c:220:6:window_Idle	11
+../Core/Src/GUI.c:278:6:window_NFC	2
+../Core/Src/GUI.c:305:6:window_RFID	2
+../Core/Src/GUI.c:332:6:window_Settings	2
+../Core/Src/GUI.c:359:6:window_Subghz	2

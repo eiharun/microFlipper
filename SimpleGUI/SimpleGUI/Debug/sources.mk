@@ -22,8 +22,8 @@ C_DEPS :=
 
 # Every subdirectory with source files must be described here
 SUBDIRS := \
+Core/Inc/u8g2stm32 \
 Core/Src \
-Core/Src/u8g2stm32 \
 Core/Startup \
 Drivers/STM32F7xx_HAL_Driver/Src \
 

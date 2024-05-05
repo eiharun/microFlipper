@@ -1,10 +1,17 @@
-18:58:39 **** Incremental Build of configuration Debug for project SimpleGUI ****
+16:58:32 **** Incremental Build of configuration Debug for project SimpleGUI ****
 make -j16 all 
+arm-none-eabi-gcc "../Core/Src/GUI.c" -mcpu=cortex-m7 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F767xx -c -I../Core/Inc -I../Drivers/STM32F7xx_HAL_Driver/Inc -I../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F7xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/GUI.d" -MT"Core/Src/GUI.o" --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -o "Core/Src/GUI.o"
+arm-none-eabi-gcc -o "SimpleGUI.elf" @"objects.list"   -mcpu=cortex-m7 -T"C:\Users\harun\Documents\GitHub\Personal-Projects\microFlipper\SimpleGUI\SimpleGUI\STM32F767ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="SimpleGUI.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: SimpleGUI.elf
+ 
 arm-none-eabi-size  SimpleGUI.elf 
+arm-none-eabi-objdump -h -S SimpleGUI.elf  > "SimpleGUI.list"
    text	   data	    bss	    dec	    hex	filename
-  23972	    332	   4508	  28812	   708c	SimpleGUI.elf
+  37208	    468	   4588	  42264	   a518	SimpleGUI.elf
 Finished building: default.size.stdout
  
+Finished building: SimpleGUI.list
+ 
 
-18:58:40 Build Finished. 0 errors, 0 warnings. (took 1s.63ms)
+16:58:34 Build Finished. 0 errors, 0 warnings. (took 1s.869ms)
 
