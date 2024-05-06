@@ -1,3 +1,5 @@
+GoTo -> [SimpleGUI](SimpleGUI/README.md)
+
 # Pages
 
 - Animated Idle Screen

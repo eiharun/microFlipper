@@ -23,10 +23,10 @@ uint8_t Tim3Count=0;
 //-----------------------------
 /**
   * @brief Handle Input Function
-  * @param None
+  * @param bool retTap (to determin if the function returns the tapped value or pressed value)
   * @retval pinState struct
   */
-pinState handleInput(){
+pinState handleInput(t_p Tap_Press){
 	button_inputs[up].last = button_inputs[up].current;
 	button_inputs[up].current = HAL_GPIO_ReadPin(Up_BTN_GPIO_Port,Up_BTN_Pin);
 	button_inputs[up].isTapped = button_inputs[up].current && !button_inputs[up].last;
@@ -56,29 +56,53 @@ pinState handleInput(){
 	button_inputs[back].current = HAL_GPIO_ReadPin(Back_BTN_GPIO_Port,Back_BTN_Pin);
 	button_inputs[back].isTapped = button_inputs[back].current && !button_inputs[back].last;
 	button_inputs[back].isPressed = button_inputs[back].current && button_inputs[back].last;
-
-	if(button_inputs[up].isTapped){
-		return button_inputs[up];//UP
-	}
-	else if(button_inputs[down].isTapped){
-		return button_inputs[down];//DOWN
-	}
-	else if(button_inputs[left].isTapped){
-		return button_inputs[left];//LEFT
-	}
-	else if(button_inputs[right].isTapped){
-		return button_inputs[right];//RIGHT
-	}
-	else if(button_inputs[select].isTapped){
-		return button_inputs[select];//SELECT
-	}
-	else if(button_inputs[back].isTapped){
-		return button_inputs[back];//BACK
+	if(Tap_Press==Tap){
+		if(button_inputs[up].isTapped){
+			return button_inputs[up];//UP
+		}
+		else if(button_inputs[down].isTapped){
+			return button_inputs[down];//DOWN
+		}
+		else if(button_inputs[left].isTapped){
+			return button_inputs[left];//LEFT
+		}
+		else if(button_inputs[right].isTapped){
+			return button_inputs[right];//RIGHT
+		}
+		else if(button_inputs[select].isTapped){
+			return button_inputs[select];//SELECT
+		}
+		else if(button_inputs[back].isTapped){
+			return button_inputs[back];//BACK
+		}
+		else{
+			return button_inputs[null];
+		}
 	}
 	else{
-		return button_inputs[null];
+		if(button_inputs[up].isPressed){
+			return button_inputs[up];//UP
+		}
+		else if(button_inputs[down].isPressed){
+			return button_inputs[down];//DOWN
+		}
+		else if(button_inputs[left].isPressed){
+			return button_inputs[left];//LEFT
+		}
+		else if(button_inputs[right].isPressed){
+			return button_inputs[right];//RIGHT
+		}
+		else if(button_inputs[select].isPressed){
+			return button_inputs[select];//SELECT
+		}
+		else if(button_inputs[back].isPressed){
+			return button_inputs[back];//BACK
+		}
+		else{
+			return button_inputs[null];
+		}
 	}
-	//USE TIMER, if still isPressed after timer expires, then move
+	//TODO Later: USE TIMER, if still isPressed after timer expires, then move
 }
 
 
@@ -128,7 +152,7 @@ int8_t item_prev=5;
 int8_t item_next=1;
 void window_Menu(u8g2_t* u8g2){
 
-	button input = handleInput().direction;
+	button input = handleInput(Tap).direction;
 	switch(input){
 	case up:
 		//isTapped, else isPushed
@@ -189,13 +213,19 @@ void window_Menu(u8g2_t* u8g2){
 
 }
 
-
+playerInfo Player={2,2};//TODO if wanting to reset progress(init when selected from menu)
 void window_Game(u8g2_t* u8g2){
-	button input = handleInput().direction;
+	button input = handleInput(Press).direction;
 	switch(input){
 	case up:
+		if(Player.y_pos>0){
+			Player.y_pos--;
+		}
 		break;
 	case down:
+		if(Player.y_pos<63){
+				Player.y_pos++;
+			}
 		break;
 	case select:
 		break;
@@ -203,8 +233,14 @@ void window_Game(u8g2_t* u8g2){
 		currWindow=menu;
 		break;
 	case left:
+		if(Player.x_pos>0){
+				Player.x_pos--;
+			}
 		break;
 	case right:
+		if(Player.x_pos<127){
+				Player.x_pos++;
+			}
 		break;
 	case null:
 		break;
@@ -213,12 +249,17 @@ void window_Game(u8g2_t* u8g2){
 	u8g2_SetDrawColor(u8g2,1);
 	u8g2_SetFont(u8g2,u8g_font_7x14);
 	u8g2_DrawStr(u8g2, 15, 30, "404 Not Found");
+
+	u8g2_DrawPixel(u8g2,Player.x_pos,Player.y_pos);
+
+
+
 	u8g2_SendBuffer(u8g2);
 
 }
 
 void window_Idle(u8g2_t* u8g2){
-	button input = handleInput().direction;
+	button input = handleInput(Tap).direction;
 	switch(input){
 	case up:
 		currWindow=menu;
@@ -270,7 +311,7 @@ void window_Idle(u8g2_t* u8g2){
 }
 
 void window_NFC(u8g2_t* u8g2){
-	button input = handleInput().direction;
+	button input = handleInput(Tap).direction;
 	switch(input){
 	case up:
 		break;
@@ -297,7 +338,7 @@ void window_NFC(u8g2_t* u8g2){
 }
 
 void window_RFID(u8g2_t* u8g2){
-	button input = handleInput().direction;
+	button input = handleInput(Tap).direction;
 	switch(input){
 	case up:
 		break;
@@ -324,7 +365,7 @@ void window_RFID(u8g2_t* u8g2){
 }
 
 void window_Settings(u8g2_t* u8g2){
-	button input = handleInput().direction;
+	button input = handleInput(Tap).direction;
 	switch(input){
 	case up:
 		break;
@@ -351,7 +392,7 @@ void window_Settings(u8g2_t* u8g2){
 }
 
 void window_Subghz(u8g2_t* u8g2){
-	button input = handleInput().direction;
+	button input = handleInput(Tap).direction;
 	switch(input){
 	case up:
 		break;

@@ -17,6 +17,10 @@ enum _btn{
 	null=0,up,down,left,right,select,back
 };typedef enum _btn button;
 
+enum _t_p{
+	Tap=0,Press=1
+};typedef enum _t_p t_p;
+
 enum _windows{
 	menu=-1,idle=0,subghz=1,rfid=2,nfc=3,game=4,settings=5
 };typedef enum _windows windows;
@@ -29,9 +33,14 @@ struct _pinState{
 	bool isPressed;
 };typedef struct _pinState pinState;
 
-pinState handleInput();
-
 extern uint8_t Tim3Count;
+
+typedef struct _playerInfo{
+	uint8_t x_pos;
+	uint8_t y_pos;
+} playerInfo;
+
+pinState handleInput(t_p Tap_Press);
 
 void handle_Windows(u8g2_t* u8g2);
 //WINDOWS ...//

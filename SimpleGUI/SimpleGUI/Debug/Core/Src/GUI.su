@@ -1,9 +1,9 @@
 ../Core/Src/GUI.c:29:10:handleInput	16	static
-../Core/Src/GUI.c:92:6:handle_Windows	16	static
-../Core/Src/GUI.c:129:6:window_Menu	32	static
-../Core/Src/GUI.c:193:6:window_Game	24	static
-../Core/Src/GUI.c:220:6:window_Idle	32	static
-../Core/Src/GUI.c:278:6:window_NFC	24	static
-../Core/Src/GUI.c:305:6:window_RFID	24	static
-../Core/Src/GUI.c:332:6:window_Settings	24	static
-../Core/Src/GUI.c:359:6:window_Subghz	24	static
+../Core/Src/GUI.c:116:6:handle_Windows	16	static
+../Core/Src/GUI.c:153:6:window_Menu	32	static
+../Core/Src/GUI.c:217:6:window_Game	24	static
+../Core/Src/GUI.c:261:6:window_Idle	32	static
+../Core/Src/GUI.c:313:6:window_NFC	24	static
+../Core/Src/GUI.c:340:6:window_RFID	24	static
+../Core/Src/GUI.c:367:6:window_Settings	24	static
+../Core/Src/GUI.c:394:6:window_Subghz	24	static
