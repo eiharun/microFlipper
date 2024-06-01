@@ -1,0 +1,73 @@
+/*
+ * WIFI.c
+ *
+ *  Created on: May 20, 2024
+ *      Author: harun
+ */
+
+#include "WIFI.h"
+uint8_t UART4_RX[1024];
+bool rxCplt=false;
+bool txCplt=true;
+bool rxErr=false;
+char* recv='\0';
+
+
+void handleWifi(UART_HandleTypeDef huart4){
+
+}
+
+
+
+ATStatus AT_test(UART_HandleTypeDef* huart4){
+	if(txCplt){
+		txCplt=false;
+	}
+	HAL_UART_Transmit_IT(huart4, (uint8_t*)"AT\r\n", 4);
+	if(rxCplt){
+		strncpy(recv,(char*)UART4_RX,strlen((char*)UART4_RX));
+		memset(UART4_RX, '\0', sizeof(UART4_RX));//Clear buffer
+		rxCplt=false;
+		if(!strncmp(recv,"AT\r\n\r\nOK\r\n", 10)){
+			memset(recv,'\0',strlen(recv));
+			return OK;
+		}
+		else{
+			//Unexpected output
+			memset(recv,'\0',strlen(recv));
+			return ERR;
+		}
+	}
+	if(rxErr){
+		rxErr=false;
+		return ERR;
+	}
+	return PEND;
+}
+
+
+ATStatus AT_restart(UART_HandleTypeDef* huart4, char* output){
+	if(txCplt){
+		txCplt=false;
+	}
+	HAL_UART_Transmit_IT(huart4, (uint8_t*)"AT+RST\r\n", 8);
+	if(rxCplt){
+		strncpy(recv,(char*)UART4_RX,strlen((char*)UART4_RX));
+		memset(UART4_RX, '\0', sizeof(UART4_RX));//Clear buffer
+		rxCplt=false;
+		if(!strncmp(recv,"AT+RST\r\n\r\nOK\r\n", 14)){
+			memset(recv,'\0',strlen(recv));
+			return OK;
+		}
+		else{
+			//Unexpected output
+			memset(recv,'\0',strlen(recv));
+			return ERR;
+		}
+	}
+	if(rxErr){
+		rxErr=false;
+		return ERR;
+	}
+	return PEND;
+}

@@ -113,7 +113,7 @@ SSD1309 OLED Max clock frequency is 10MHz
 <!-- Your Text Here. You may work with your mentor on this later when they are assigned -->
 
 - Milestone 1: OLED GUI and Button Interface --->[[Current](SimpleGUI/README.md)]
-- Milestone 2: Sub-GHz/Radio Interface
+- Milestone 2: Sub-GHz/Radio (433MHz atm) Interface
 - Milestone 3: WiFi/Ethernet Interface
 
 ## Useful Links

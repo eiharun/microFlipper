@@ -253,7 +253,6 @@ void window_Game(u8g2_t* u8g2){
 	u8g2_DrawPixel(u8g2,Player.x_pos,Player.y_pos);
 
 
-
 	u8g2_SendBuffer(u8g2);
 
 }

@@ -1,0 +1,33 @@
+/*
+ * WIFI.h
+ *
+ *  Created on: May 20, 2024
+ *      Author: harun
+ */
+
+#ifndef INC_WIFI_H_
+#define INC_WIFI_H_
+
+#include "stm32f7xx_hal.h"
+#include <stdint.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h> //Temporary...
+
+extern uint8_t UART4_RX[1024];
+extern bool rxCplt;
+extern bool txCplt;
+extern bool rxErr;
+extern char* recv;
+enum _atstatus {AT_OK, AT_ERR, AR_PEND}; typedef enum _atstatus ATStatus;
+//TODO: Include AT_xxx prefix
+
+void handleWifi(UART_HandleTypeDef huart4);
+
+
+//AT COMMANDS
+ATStatus AT_test(UART_HandleTypeDef* huart4);
+ATStatus AT_restart(UART_HandleTypeDef* huart4, char* output);
+ATStatus AT_version(UART_HandleTypeDef* huart4, char* version);
+
+#endif /* INC_WIFI_H_ */
