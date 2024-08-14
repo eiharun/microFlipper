@@ -57,6 +57,7 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern DMA_HandleTypeDef hdma_uart4_rx;
 extern UART_HandleTypeDef huart4;
 /* USER CODE BEGIN EV */
 
@@ -201,6 +202,20 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
+  * @brief This function handles DMA1 stream2 global interrupt.
+  */
+void DMA1_Stream2_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Stream2_IRQn 0 */
+
+  /* USER CODE END DMA1_Stream2_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_uart4_rx);
+  /* USER CODE BEGIN DMA1_Stream2_IRQn 1 */
+
+  /* USER CODE END DMA1_Stream2_IRQn 1 */
+}
+
+/**
   * @brief This function handles UART4 global interrupt.
   */
 void UART4_IRQHandler(void)
@@ -215,23 +230,49 @@ void UART4_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
-	//cp buffer, clear rx
-	rxErr=false;
-	rxCplt=true;
-}
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+//	//cp buffer, clear rx
+//	HAL_GPIO_WritePin(LED_BLUE_GPIO_Port,LED_BLUE_Pin,SET);
+//
+//	rxErr=false;
+////	rxCplt=true;
+////	memcpy(&UART4_RX[RX_buffPtr],&buff,1);
+//
+//	if(strstr((char*)UART4_RX,"OK\r\n\r\n")!=NULL){
+//		rxCplt=true;
+//		HAL_GPIO_WritePin(LED_BLUE_GPIO_Port,LED_BLUE_Pin,RESET);
+//	}
+//	if(rxCplt==false){
+//		HAL_UART_Receive_IT(&huart4, UART4_RX, RXSIZE);
+//	}
+//}
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
-//	indx = Size;//Size=how many bytes was recieved when this was called
 	rxErr=false;
 	rxCplt=true;
-//	HAL_UARTEx_ReceiveToIdle_IT(&huart4, UART4_RX, sizeof(UART4_RX));
+
+	data_head=data_tail;//New position to enter(index of end of previous entry=tail-1)
+
+	if(data_head+Size>=DATASIZE){//Handle case to wrap around circular buffer
+		uint16_t size_leftover = DATASIZE-data_head;
+		memcpy((uint8_t *)Data_Buffer+data_head, UART4_RX, size_leftover);
+
+		memcpy((uint8_t *)Data_Buffer, (uint8_t *)UART4_RX+size_leftover, Size-size_leftover);
+		data_tail = Size-size_leftover;
+	}
+	else{//Copy to data buffer and update pointer
+		memcpy ((uint8_t *)Data_Buffer+data_head, UART4_RX, Size);
+		data_tail = data_head+Size;
+	}
+	HAL_GPIO_WritePin(LED_BLUE_GPIO_Port,LED_BLUE_Pin,RESET);
+
+//	memset(UART4_RX,'\0',RXSIZE);//RESET/CLEAR data buffer for next rx
 }
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
 	txCplt=true;
 	rxErr=false;
-//	HAL_UART_Receive_IT(&huart4, UART4_RX, 1);
-	HAL_UARTEx_ReceiveToIdle_IT(&huart4, UART4_RX, sizeof(UART4_RX));
+	HAL_GPIO_WritePin(LED_BLUE_GPIO_Port,LED_BLUE_Pin,SET);
+	HAL_UARTEx_ReceiveToIdle_DMA(&huart4, UART4_RX, RXSIZE);
 	//Immedietely after the AT command is sent, start listening for a response.
 }
 void ErrorCallback(UART_HandleTypeDef *huart){

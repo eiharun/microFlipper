@@ -1,0 +1,13 @@
+/*
+ * CC1101_regs.h
+ *
+ *  Created on: Aug 13, 2024
+ *      Author: harun
+ */
+
+#ifndef INC_CC1101_REGS_H_
+#define INC_CC1101_REGS_H_
+
+
+
+#endif /* INC_CC1101_REGS_H_ */

@@ -1,4 +1,5 @@
-UART4_RX
 rxCplt
 txCplt
 recv
+queryMode
+test

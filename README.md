@@ -65,12 +65,13 @@ My initial goal is to create a prototype off of a development board with proper 
 
 - Get familiar with new equipment (if any)
 - Program LCD GUI and Button Interface
-- Program a quick simple game easter egg
+- Program a quick simple game 
 - Sub-GHz/Radio
+- Wifi
+- microSD card reader/writer
+- NFC
 - IR
 - RFID
-- NFC
-- microSD card reader/writer
 - GPIO/Module Dev
 
 ## Design Decisions
@@ -112,9 +113,9 @@ SSD1309 OLED Max clock frequency is 10MHz
 
 <!-- Your Text Here. You may work with your mentor on this later when they are assigned -->
 
-- Milestone 1: OLED GUI and Button Interface --->[[Current](SimpleGUI/README.md)]
-- Milestone 2: Sub-GHz/Radio (433MHz atm) Interface
-- Milestone 3: WiFi/Ethernet Interface
+- Milestone 1: OLED GUI and Button Interface 
+- Milestone 2: Sub-GHz/Radio (433MHz atm) Interface (Intro Task: Create a RTTY) --->[[Current](SimpleGUI/README.md)]
+- Milestone 3: WiFi/Ethernet Interface (Intro Task: Create a web interface)
 
 ## Useful Links
 

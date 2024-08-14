@@ -1,0 +1,620 @@
+/*
+ * WIFI.c
+ *
+ *  Created on: May 20, 2024
+ *      Author: harun
+ */
+
+#include "WIFI.h"
+#include "main.h"
+
+uint8_t UART4_RX[RXSIZE];
+uint8_t Data_Buffer[DATASIZE];
+uint16_t data_head=0,data_tail=0;
+bool rxCplt=false;
+bool txCplt=false;
+bool rxErr=false;
+uint8_t waitTMout=0;
+char* recv='\0';
+
+void handleWifi(UART_HandleTypeDef huart4){
+
+}
+
+
+
+ATStatus AT_test(UART_HandleTypeDef* huart4){
+	if(txCplt==false){
+		HAL_UART_Transmit_IT(huart4, (uint8_t*)"AT\r\n", 4);
+	}
+	while(!rxCplt){
+		//wait until rx is CPLT
+		HAL_GPIO_WritePin(LED_RED_GPIO_Port,LED_RED_Pin,SET);
+		HAL_Delay(1);
+		HAL_GPIO_WritePin(LED_RED_GPIO_Port,LED_RED_Pin,RESET);
+		//Have a timeout(there is something wrong if this while loop runs more than 10 times)
+		if(waitTMout>10){
+			return AT_TMOUT;
+		}
+		waitTMout++;
+	}
+	waitTMout=0;
+	if(rxCplt && txCplt){
+		rxCplt=false;
+		txCplt=false;
+		memset(recv,'\0',strlen(recv));
+		//COPY ONLY RELEVANT section of Data buffer into recv
+		if(data_head>data_tail){//handle wrap around condition
+			uint16_t size_leftover = DATASIZE-data_head;
+			memcpy((uint8_t*)recv, (uint8_t*)Data_Buffer+data_head, size_leftover);
+
+			memcpy((uint8_t*)recv+size_leftover, (uint8_t*)Data_Buffer, data_tail);
+		}
+		else{
+			memcpy((uint8_t*)recv, (uint8_t*)Data_Buffer+data_head, data_tail-data_head);
+		}
+
+		if(strncmp(recv, "AT\r\n\r\nOK\r\n",strlen(recv))==0){
+			memset(recv,'\0',strlen(recv));
+			return AT_OK;
+		}
+		else if(strstr(recv,"\r\nERROR\r\n")!=NULL){
+			return AT_ERR;
+		}
+	}
+	else{
+		return AT_PEND;
+	}
+	if(rxErr){
+		return AT_ERR;
+	}
+	return AT_ERR;
+}
+
+
+ATStatus AT_restart(UART_HandleTypeDef* huart4){
+	if(txCplt==false){//redundant
+		HAL_UART_Transmit_IT(huart4, (uint8_t*)"AT+RST\r\n", 8);
+	}
+	while(!rxCplt){
+		//wait until rx is CPLT
+		HAL_GPIO_WritePin(LED_RED_GPIO_Port,LED_RED_Pin,SET);
+		HAL_Delay(1);
+		HAL_GPIO_WritePin(LED_RED_GPIO_Port,LED_RED_Pin,RESET);
+		//Have a timeout(there is something wrong if this while loop runs more than 10 times)
+		if(waitTMout>10){
+			return AT_TMOUT;
+		}
+		waitTMout++;
+	}
+	waitTMout=0;
+	if(rxCplt && txCplt){
+		rxCplt=false;
+		txCplt=false;
+		//COPY ONLY RELEVANT section of Data buffer into recv
+		memset(recv,'\0',strlen(recv));
+		if(data_head>data_tail){//handle wrap around condition
+			uint16_t size_leftover = DATASIZE-data_head;
+			memcpy((uint8_t*)recv, (uint8_t*)Data_Buffer+data_head, size_leftover);
+
+			memcpy((uint8_t*)recv+size_leftover, (uint8_t*)Data_Buffer, data_tail);
+		}
+		else{
+			memcpy((uint8_t*)recv, (uint8_t*)Data_Buffer+data_head, data_tail-data_head);
+		}
+
+		if(strncmp(recv, "AT+RST\r\n\r\nOK\r\n",strlen(recv))==0){
+			memset(recv,'\0',strlen(recv));
+			return AT_OK;
+		}
+		else if(strstr(recv,"\r\nERROR\r\n")!=NULL){
+			return AT_ERR;
+		}
+	}
+	else{
+		return AT_PEND;
+	}
+	if(rxErr){
+		return AT_ERR;
+	}
+	return AT_ERR;
+}
+
+ATStatus AT_version(UART_HandleTypeDef* huart4, char* output){
+	if(txCplt==false){
+		HAL_UART_Transmit_IT(huart4, (uint8_t*)"AT+GMR\r\n", 8);
+	}
+	while(!rxCplt){
+		//wait until rx is CPLT
+		HAL_GPIO_WritePin(LED_RED_GPIO_Port,LED_RED_Pin,SET);
+		HAL_Delay(1);
+		HAL_GPIO_WritePin(LED_RED_GPIO_Port,LED_RED_Pin,RESET);
+		//Have a timeout(there is something wrong if this while loop runs more than 10 times)
+		if(waitTMout>10){
+			return AT_TMOUT;
+		}
+		waitTMout++;
+	}
+	waitTMout=0;
+	if(rxCplt && txCplt){
+		rxCplt=false;
+		txCplt=false;
+		memset(recv,'\0',strlen(recv));
+		if(data_head>data_tail){//handle wrap around condition
+			uint16_t size_leftover = DATASIZE-data_head;
+			memcpy((uint8_t*)recv, (uint8_t*)Data_Buffer+data_head, size_leftover);
+			memcpy((uint8_t*)recv+size_leftover, (uint8_t*)Data_Buffer, data_tail);
+		}
+		else{
+			memcpy((uint8_t*)recv, (uint8_t*)Data_Buffer+data_head, data_tail-data_head);
+		}
+
+		if(strstr(recv, "\r\nOK\r\n")!=NULL){
+			memcpy(output, (uint8_t*)recv, strlen(recv));//Return outputted information to be processed later
+			memset(recv,'\0',strlen(recv));
+			return AT_OK;
+		}
+		else if(strstr(recv,"\r\nERROR\r\n")!=NULL){
+			return AT_ERR;
+		}
+	}
+	else{
+		return AT_PEND;
+	}
+	if(rxErr){
+		return AT_ERR;
+	}
+	return AT_ERR;
+}
+//----------WIFI----------//
+ATStatus AT_queryWIFImode(UART_HandleTypeDef* huart4, WifiMode* mode){
+	if(txCplt==false){
+		HAL_UART_Transmit_IT(huart4, (uint8_t*)"AT+CWMODE?\r\n", 12);
+	}
+	while(!rxCplt){
+		//wait until rx is CPLT
+		HAL_GPIO_WritePin(LED_RED_GPIO_Port,LED_RED_Pin,SET);
+		HAL_Delay(1);
+		HAL_GPIO_WritePin(LED_RED_GPIO_Port,LED_RED_Pin,RESET);
+		//Have a timeout(there is something wrong if this while loop runs more than 10 times)
+		if(waitTMout>10){
+			return AT_TMOUT;
+		}
+		waitTMout++;
+	}
+	waitTMout=0;
+	if(rxCplt && txCplt){
+		rxCplt=false;
+		txCplt=false;
+		memset(recv,'\0',strlen(recv));
+		if(data_head>data_tail){//handle wrap around condition
+			uint16_t size_leftover = DATASIZE-data_head;
+			memcpy((uint8_t*)recv, (uint8_t*)Data_Buffer+data_head, size_leftover);
+
+			memcpy((uint8_t*)recv+size_leftover, (uint8_t*)Data_Buffer, data_tail);
+		}
+		else{
+			memcpy((uint8_t*)recv, (uint8_t*)Data_Buffer+data_head, data_tail-data_head);
+		}
+
+		if(strstr(recv, "\r\nOK\r\n")!=NULL){
+			char* start = strstr(recv,"+CWMODE:");
+			char* curMode=(char*)'4';
+			strncpy(curMode, start+strlen("+CWMODE:"),1);
+			*mode = (WifiMode)atoi(curMode);
+			memset(recv,'\0',strlen(recv));
+			return AT_OK;
+		}
+		else if(strstr(recv,"\r\nERROR\r\n")!=NULL){
+			return AT_ERR;
+		}
+	}
+	else{
+		return AT_PEND;
+	}
+	if(rxErr){
+		return AT_ERR;
+	}
+	return AT_ERR;
+}
+
+ATStatus AT_setWIFImode(UART_HandleTypeDef* huart4, WifiMode mode){
+	if(txCplt==false){
+		switch(mode){
+		case Null:
+			HAL_UART_Transmit_IT(huart4, (uint8_t*)"AT+CWMODE=0\r\n", 13);
+			break;
+		case STATION:
+			HAL_UART_Transmit_IT(huart4, (uint8_t*)"AT+CWMODE=1\r\n", 13);
+			break;
+		case AP:
+			HAL_UART_Transmit_IT(huart4, (uint8_t*)"AT+CWMODE=2\r\n", 13);
+			break;
+		case AP_STATION:
+			HAL_UART_Transmit_IT(huart4, (uint8_t*)"AT+CWMODE=3\r\n", 13);
+			break;
+		}
+	}
+	while(!rxCplt){
+		//wait until rx is CPLT
+		HAL_GPIO_WritePin(LED_RED_GPIO_Port,LED_RED_Pin,SET);
+		HAL_Delay(1);
+		HAL_GPIO_WritePin(LED_RED_GPIO_Port,LED_RED_Pin,RESET);
+		//Have a timeout(there is something wrong if this while loop runs more than 10 times)
+		if(waitTMout>10){
+			return AT_TMOUT;
+		}
+		waitTMout++;
+	}
+	waitTMout=0;
+	if(rxCplt && txCplt){
+		rxCplt=false;
+		txCplt=false;
+		memset(recv,'\0',strlen(recv));
+		if(data_head>data_tail){//handle wrap around condition
+			uint16_t size_leftover = DATASIZE-data_head;
+			memcpy((uint8_t*)recv, (uint8_t*)Data_Buffer+data_head, size_leftover);
+
+			memcpy((uint8_t*)recv+size_leftover, (uint8_t*)Data_Buffer, data_tail);
+		}
+		else{
+			memcpy((uint8_t*)recv, (uint8_t*)Data_Buffer+data_head, data_tail-data_head);
+		}
+
+		if(strstr(recv, "\r\nOK\r\n")!=NULL){
+			//do something?
+			memset(recv,'\0',strlen(recv));
+			return AT_OK;
+		}
+		else if(strstr(recv,"\r\nERROR\r\n")!=NULL){
+			return AT_ERR;
+		}
+	}
+	else{
+		return AT_PEND;
+	}
+	if(rxErr){
+		return AT_ERR;
+	}
+	return AT_ERR;
+}
+
+//----------TCP-IP----------//
+ATStatus AT_queryMUX(UART_HandleTypeDef* huart4, MuxMode* mode){
+	if(txCplt==false){
+		HAL_UART_Transmit_IT(huart4, (uint8_t*)"AT+CUPMUX\r\n", 11);
+	}
+	while(!rxCplt){
+		//wait until rx is CPLT
+		HAL_GPIO_WritePin(LED_RED_GPIO_Port,LED_RED_Pin,SET);
+		HAL_Delay(1);
+		HAL_GPIO_WritePin(LED_RED_GPIO_Port,LED_RED_Pin,RESET);
+		//Have a timeout(there is something wrong if this while loop runs more than 10 times)
+		if(waitTMout>10){
+			return AT_TMOUT;
+		}
+		waitTMout++;
+	}
+	waitTMout=0;
+	if(rxCplt && txCplt){
+		rxCplt=false;
+		txCplt=false;
+		memset(recv,'\0',strlen(recv));
+		//COPY ONLY RELEVANT section of Data buffer into recv
+		if(data_head>data_tail){//handle wrap around condition
+			uint16_t size_leftover = DATASIZE-data_head;
+			memcpy((uint8_t*)recv, (uint8_t*)Data_Buffer+data_head, size_leftover);
+			memcpy((uint8_t*)recv+size_leftover, (uint8_t*)Data_Buffer, data_tail);
+		}
+		else{
+			memcpy((uint8_t*)recv, (uint8_t*)Data_Buffer+data_head, data_tail-data_head);
+		}
+
+		if(strstr(recv, "\r\nOK\r\n")!=NULL){
+			char* start = strstr(recv,"+CIPMUX:");
+			char* curMode=(char*)'2';
+			strncpy(curMode, start+strlen("+CIPMUX:"),1);
+			*mode = (MuxMode)atoi(curMode);
+			memset(recv,'\0',strlen(recv));
+			return AT_OK;
+		}
+		else if(strstr(recv,"\r\nERROR\r\n")!=NULL){
+			return AT_ERR;
+		}
+	}
+	else{
+		return AT_PEND;
+	}
+	if(rxErr){
+		return AT_ERR;
+	}
+	return AT_ERR;
+}
+
+ATStatus AT_setMUX(UART_HandleTypeDef* huart4, MuxMode mode){
+	if(txCplt==false){
+		switch(mode){
+		case SINGLE:
+			HAL_UART_Transmit_IT(huart4, (uint8_t*)"AT+CIPMUX=0\r\n", 13);
+			break;
+		case MULTIPLE:
+			HAL_UART_Transmit_IT(huart4, (uint8_t*)"AT+CIPMUX=1\r\n", 13);
+			break;
+		}
+	}
+	while(!rxCplt){
+		//wait until rx is CPLT
+		HAL_GPIO_WritePin(LED_RED_GPIO_Port,LED_RED_Pin,SET);
+		HAL_Delay(1);
+		HAL_GPIO_WritePin(LED_RED_GPIO_Port,LED_RED_Pin,RESET);
+		//Have a timeout(there is something wrong if this while loop runs more than 10 times)
+		if(waitTMout>10){
+			return AT_TMOUT;
+		}
+		waitTMout++;
+	}
+	waitTMout=0;
+	if(rxCplt && txCplt){
+		rxCplt=false;
+		txCplt=false;
+		memset(recv,'\0',strlen(recv));
+		if(data_head>data_tail){//handle wrap around condition
+			uint16_t size_leftover = DATASIZE-data_head;
+			memcpy((uint8_t*)recv, (uint8_t*)Data_Buffer+data_head, size_leftover);
+
+			memcpy((uint8_t*)recv+size_leftover, (uint8_t*)Data_Buffer, data_tail);
+		}
+		else{
+			memcpy((uint8_t*)recv, (uint8_t*)Data_Buffer+data_head, data_tail-data_head);
+		}
+
+		if(strstr(recv, "\r\nOK\r\n")!=NULL){
+			//do something?
+			memset(recv,'\0',strlen(recv));
+			return AT_OK;
+		}
+		else if(strstr(recv,"\r\nERROR\r\n")!=NULL){
+			return AT_ERR;
+		}
+	}
+	else{
+		return AT_PEND;
+	}
+	if(rxErr){
+		return AT_ERR;
+	}
+	return AT_ERR;
+}
+
+ATStatus AT_queryServer(UART_HandleTypeDef* huart4, ServerMode* mode, uint16_t* port){
+	if(txCplt==false){
+		HAL_UART_Transmit_IT(huart4, (uint8_t*)"AT+CIPSERVER?\r\n", 15);
+	}
+	while(!rxCplt){
+		//wait until rx is CPLT
+		HAL_GPIO_WritePin(LED_RED_GPIO_Port,LED_RED_Pin,SET);
+		HAL_Delay(1);
+		HAL_GPIO_WritePin(LED_RED_GPIO_Port,LED_RED_Pin,RESET);
+		//Have a timeout(there is something wrong if this while loop runs more than 10 times)
+		if(waitTMout>10){
+			return AT_TMOUT;
+		}
+		waitTMout++;
+	}
+	waitTMout=0;
+	if(rxCplt && txCplt){
+		rxCplt=false;
+		txCplt=false;
+		memset(recv,'\0',strlen(recv));
+		//COPY ONLY RELEVANT section of Data buffer into recv
+		if(data_head>data_tail){//handle wrap around condition
+			uint16_t size_leftover = DATASIZE-data_head;
+			memcpy((uint8_t*)recv, (uint8_t*)Data_Buffer+data_head, size_leftover);
+			memcpy((uint8_t*)recv+size_leftover, (uint8_t*)Data_Buffer, data_tail);
+		}
+		else{
+			memcpy((uint8_t*)recv, (uint8_t*)Data_Buffer+data_head, data_tail-data_head);
+		}
+
+		if(strstr(recv, "\r\nOK\r\n")!=NULL){
+			//DO SOMETHING
+			char* start = strstr(recv,"+CIPSERVER:");
+			char* curMode=(char*)'2';
+			strncpy(curMode, start+strlen("+CIPSERVER:"),1);
+			*mode = (ServerMode)atoi(curMode);
+			if(*mode==CREATE){
+				char* startPort = strstr(recv,"+CIPSERVER:1,");
+				char* curPort=(char*)'2';
+				strncpy(curPort, startPort+strlen("+CIPSERVER:1,"),1);
+				*port = (uint16_t)atoi(curPort);
+			}
+			else if (mode==0){
+				//include a param2
+			}
+			else{
+				*port=0xFFFF;
+			}
+			memset(recv,'\0',strlen(recv));
+			return AT_OK;
+		}
+		else if(strstr(recv,"\r\nERROR\r\n")!=NULL){
+			return AT_ERR;
+		}
+	}
+	else{
+		return AT_PEND;
+	}
+	if(rxErr){
+		return AT_ERR;
+	}
+	return AT_ERR;
+}
+
+ATStatus AT_setServer(UART_HandleTypeDef* huart4, ServerMode mode, uint16_t port){
+	//CIPMUX must be set to 1, check this first
+	if(txCplt==false){
+		char* argument='\0';
+		char* sport='\0';
+		snprintf(sport,6, "%d", port);
+		switch(mode){
+		case DELETE:
+			snprintf(argument, 17+strlen(sport), "AT+CIPSERVER=0,%s\r\n", sport);
+			HAL_UART_Transmit_IT(huart4, (uint8_t*)argument, strlen(argument));
+			break;
+		case CREATE:
+			snprintf(argument, 17+strlen(sport), "AT+CIPSERVER=1,%s\r\n", sport);
+			HAL_UART_Transmit_IT(huart4, (uint8_t*)argument, strlen(argument));
+			break;
+		}
+	}
+	while(!rxCplt){
+		//wait until rx is CPLT
+		HAL_GPIO_WritePin(LED_RED_GPIO_Port,LED_RED_Pin,SET);
+		HAL_Delay(1);
+		HAL_GPIO_WritePin(LED_RED_GPIO_Port,LED_RED_Pin,RESET);
+		//Have a timeout(there is something wrong if this while loop runs more than 10 times)
+		if(waitTMout>10){
+			return AT_TMOUT;
+		}
+		waitTMout++;
+	}
+	waitTMout=0;
+	if(rxCplt && txCplt){
+		rxCplt=false;
+		txCplt=false;
+		memset(recv,'\0',strlen(recv));
+		//COPY ONLY RELEVANT section of Data buffer into recv
+		if(data_head>data_tail){//handle wrap around condition
+			uint16_t size_leftover = DATASIZE-data_head;
+			memcpy((uint8_t*)recv, (uint8_t*)Data_Buffer+data_head, size_leftover);
+			memcpy((uint8_t*)recv+size_leftover, (uint8_t*)Data_Buffer, data_tail);
+		}
+		else{
+			memcpy((uint8_t*)recv, (uint8_t*)Data_Buffer+data_head, data_tail-data_head);
+		}
+
+		if(strstr(recv, "\r\nOK\r\n")!=NULL){
+			memset(recv,'\0',strlen(recv));
+			return AT_OK;
+		}
+		else if(strstr(recv,"\r\nERROR\r\n")!=NULL){
+			MuxMode cipmuxMode;
+			AT_queryMUX(huart4, &cipmuxMode);
+			if(cipmuxMode==SINGLE){
+				return AT_MISCONFIG;
+			}
+			else{
+				return AT_ERR;
+			}
+		}
+	}
+	else{
+		return AT_PEND;
+	}
+	if(rxErr){
+		return AT_ERR;
+	}
+	return AT_ERR;
+}
+
+ATStatus AT_getIP(UART_HandleTypeDef* huart4, char* output){
+	if(txCplt==false){
+		HAL_UART_Transmit_IT(huart4, (uint8_t*)"AT+CIFSR\r\n", 10);
+	}
+	while(!rxCplt){
+		//wait until rx is CPLT
+		HAL_GPIO_WritePin(LED_RED_GPIO_Port,LED_RED_Pin,SET);
+		HAL_Delay(1);
+		HAL_GPIO_WritePin(LED_RED_GPIO_Port,LED_RED_Pin,RESET);
+		//Have a timeout(there is something wrong if this while loop runs more than 10 times)
+		if(waitTMout>10){
+			return AT_TMOUT;
+		}
+		waitTMout++;
+	}
+	waitTMout=0;
+	if(rxCplt && txCplt){
+		rxCplt=false;
+		txCplt=false;
+		memset(recv,'\0',strlen(recv));
+		if(data_head>data_tail){//handle wrap around condition
+			uint16_t size_leftover = DATASIZE-data_head;
+			memcpy((uint8_t*)recv, (uint8_t*)Data_Buffer+data_head, size_leftover);
+			memcpy((uint8_t*)recv+size_leftover, (uint8_t*)Data_Buffer, data_tail);
+		}
+		else{
+			memcpy((uint8_t*)recv, (uint8_t*)Data_Buffer+data_head, data_tail-data_head);
+		}
+
+		if(strstr(recv, "\r\nOK\r\n")!=NULL){
+			memcpy(output, (uint8_t*)recv, strlen(recv));//Return outputted information to be processed later
+			memset(recv,'\0',strlen(recv));
+			return AT_OK;
+		}
+		else if(strstr(recv,"\r\nERROR\r\n")!=NULL){
+			return AT_ERR;
+		}
+	}
+	else{
+		return AT_PEND;
+	}
+	if(rxErr){
+		return AT_ERR;
+	}
+	return AT_ERR;
+}
+
+ATStatus AT_Send(UART_HandleTypeDef* huart4, char* data, size_t size, uint8_t linkID){
+	if(txCplt==false){
+		HAL_UART_Transmit_IT(huart4, (uint8_t*)"AT+CIPSEND\r\n", 12);
+	}
+	while(!rxCplt){
+		//wait until rx is CPLT
+		HAL_GPIO_WritePin(LED_RED_GPIO_Port,LED_RED_Pin,SET);
+		HAL_Delay(1);
+		HAL_GPIO_WritePin(LED_RED_GPIO_Port,LED_RED_Pin,RESET);
+		//Have a timeout(there is something wrong if this while loop runs more than 10 times)
+		if(waitTMout>10){
+			return AT_TMOUT;
+		}
+		waitTMout++;
+	}
+	waitTMout=0;
+	if(rxCplt && txCplt){
+		rxCplt=false;
+		txCplt=false;
+		memset(recv,'\0',strlen(recv));
+		//COPY ONLY RELEVANT section of Data buffer into recv
+		if(data_head>data_tail){//handle wrap around condition
+			uint16_t size_leftover = DATASIZE-data_head;
+			memcpy((uint8_t*)recv, (uint8_t*)Data_Buffer+data_head, size_leftover);
+			memcpy((uint8_t*)recv+size_leftover, (uint8_t*)Data_Buffer, data_tail);
+		}
+		else{
+			memcpy((uint8_t*)recv, (uint8_t*)Data_Buffer+data_head, data_tail-data_head);
+		}
+
+		if(strstr(recv, "\r\nOK\r\n")!=NULL){
+			//DO SOMETHING
+
+			memset(recv,'\0',strlen(recv));
+			return AT_OK;
+		}
+		else if(strstr(recv,"\r\nERROR\r\n")!=NULL){
+			return AT_ERR;
+		}
+	}
+	else{
+		return AT_PEND;
+	}
+	if(rxErr){
+		return AT_ERR;
+	}
+	return AT_ERR;
+}
+
+ATStatus AT_Close(UART_HandleTypeDef* huart4, uint8_t linkID){
+	return AT_ERR;
+}
+
+

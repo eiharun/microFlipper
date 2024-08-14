@@ -1,4 +1,13 @@
-../Core/Src/WIFI.c:16:6:handleWifi	8	static
-../Core/Src/WIFI.c:22:10:AT_test	24	static
-../Core/Src/WIFI.c:49:10:AT_restart	24	static
-../Core/Src/WIFI.c:80:10:AT_version	16	static
+../Core/Src/WIFI.c:20:6:handleWifi	8	static
+../Core/Src/WIFI.c:26:10:AT_test	32	static
+../Core/Src/WIFI.c:75:10:AT_restart	32	static
+../Core/Src/WIFI.c:123:10:AT_version	32	static
+../Core/Src/WIFI.c:170:10:AT_queryWIFImode	40	static
+../Core/Src/WIFI.c:221:10:AT_setWIFImode	32	static
+../Core/Src/WIFI.c:283:10:AT_queryMUX	40	static
+../Core/Src/WIFI.c:334:10:AT_setMUX	32	static
+../Core/Src/WIFI.c:389:10:AT_queryServer	56	static
+../Core/Src/WIFI.c:453:10:AT_setServer	40	static
+../Core/Src/WIFI.c:521:10:AT_getIP	16	static
+../Core/Src/WIFI.c:525:10:AT_Send	24	static
+../Core/Src/WIFI.c:529:10:AT_Close	16	static
